@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+        App Sandbox is disabled. ScreenCaptureKit requires
+        the Screen Recording TCC permission, which is granted
+        by the user in System Settings → Privacy & Security.
+
+        Hardened Runtime is enabled (ENABLE_HARDENED_RUNTIME = YES in project.yml)
+        to satisfy Gatekeeper / notarization requirements.
+    -->
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+
+    <!--
+        Microphone access under Hardened Runtime.
+        Without this, AVAudioEngine will be silently denied when
+        Hardened Runtime is ON, even if the user granted TCC access.
+    -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+</dict>
+</plist>

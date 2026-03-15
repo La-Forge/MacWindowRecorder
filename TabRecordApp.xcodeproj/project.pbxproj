@@ -1,0 +1,502 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1D05C9E0B656DBDB099CB58F /* OutputFileNamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19623E2941933379CB62ECE /* OutputFileNamer.swift */; };
+		2753D14AFB524DE28EA326E8 /* RecordingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 689C316799631D368354FE52 /* RecordingEngine.swift */; };
+		44CEAEB6023A81F8FF2AD80D /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA472BAF1F892CD0D8842D45 /* CoreAudio.framework */; };
+		4B3829187EF7DDAC310B1C5E /* CMTimeConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA13C13FB13A3EA4361C34A /* CMTimeConverter.swift */; };
+		548410F713DB3CB649DD4D2D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6309A4CBF333300AEA57F6B /* main.swift */; };
+		805A9FB3EA8C7EF3FF1FC667 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D565FB46FF6B13B371E3D58 /* AVFoundation.framework */; };
+		81B5FDFC717C023D9F7D4725 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47BC5A6F754661945E93399B /* MenuBarController.swift */; };
+		865FD721029BC885CEBE029D /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5635AD379258CCC0BEFC6F0 /* AppKit.framework */; };
+		AA280F9DF903F781C22EA58C /* AVAudioPCMBuffer+CMSampleBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D293B314AE9AD2409B1DFBD2 /* AVAudioPCMBuffer+CMSampleBuffer.swift */; };
+		B29E3415C87D7887F6D49F98 /* SourcePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80C0CB7E02F3387F723DEC94 /* SourcePickerView.swift */; };
+		C0738601BC6C18496FF60B82 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2CAB7DAE9883C1E1FDCCFAC /* Assets.xcassets */; };
+		D4E9024AE654F23CA6DA39C3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09C3291A9B86B577AFAD919 /* AppDelegate.swift */; };
+		D6CDED1E3EC4544B7B7917F7 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94B2A2F429BA7B7FFE70E8D1 /* CoreVideo.framework */; };
+		DC8CD5DE7EA85FC8EC291451 /* ScreenCaptureKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 67AA39C1F0C35DA9DB5B591F /* ScreenCaptureKit.framework */; };
+		DE2421BB6B7E39254103CE2C /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 19A673B99F7ED1479A126010 /* CoreMedia.framework */; };
+		E01C9E454E7A9FD46883A0A3 /* AVAudioPCMBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE7E336DFFDFFCECAD0A4CE /* AVAudioPCMBufferTests.swift */; };
+		E56475047F88D4034F370981 /* OutputFileNamerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 731741A13DA3FE8E7FD926D4 /* OutputFileNamerTests.swift */; };
+		F30E062DAF2A27FBA75EA3D2 /* CMTimeConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA1219B6E77D1FD4AEC130D /* CMTimeConverterTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E967C896DE6D882B53EB44A8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F242E5463E8A65DF393CA6B4 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BB6883497CDD3908433580A4;
+			remoteInfo = TabRecordApp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0980A1028C9312BEA1C7651F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		19A673B99F7ED1479A126010 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		2D565FB46FF6B13B371E3D58 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		47BC5A6F754661945E93399B /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
+		4EA1219B6E77D1FD4AEC130D /* CMTimeConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMTimeConverterTests.swift; sourceTree = "<group>"; };
+		58346526337ABF7F29BC2195 /* TabRecordApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TabRecordApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		67AA39C1F0C35DA9DB5B591F /* ScreenCaptureKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenCaptureKit.framework; path = System/Library/Frameworks/ScreenCaptureKit.framework; sourceTree = SDKROOT; };
+		689C316799631D368354FE52 /* RecordingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingEngine.swift; sourceTree = "<group>"; };
+		731741A13DA3FE8E7FD926D4 /* OutputFileNamerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileNamerTests.swift; sourceTree = "<group>"; };
+		80C0CB7E02F3387F723DEC94 /* SourcePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourcePickerView.swift; sourceTree = "<group>"; };
+		89CAC22B9161A4CF3E744AD7 /* TabRecordAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TabRecordAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BA13C13FB13A3EA4361C34A /* CMTimeConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMTimeConverter.swift; sourceTree = "<group>"; };
+		94B2A2F429BA7B7FFE70E8D1 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		A09C3291A9B86B577AFAD919 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A19623E2941933379CB62ECE /* OutputFileNamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileNamer.swift; sourceTree = "<group>"; };
+		A2CAB7DAE9883C1E1FDCCFAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA472BAF1F892CD0D8842D45 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		B6309A4CBF333300AEA57F6B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		C5635AD379258CCC0BEFC6F0 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		D293B314AE9AD2409B1DFBD2 /* AVAudioPCMBuffer+CMSampleBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioPCMBuffer+CMSampleBuffer.swift"; sourceTree = "<group>"; };
+		DCE7E336DFFDFFCECAD0A4CE /* AVAudioPCMBufferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioPCMBufferTests.swift; sourceTree = "<group>"; };
+		DD8C8972213CD23A2426D94F /* TabRecord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TabRecord.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A1D7B8CD2FA75BB412141EE5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC8CD5DE7EA85FC8EC291451 /* ScreenCaptureKit.framework in Frameworks */,
+				805A9FB3EA8C7EF3FF1FC667 /* AVFoundation.framework in Frameworks */,
+				865FD721029BC885CEBE029D /* AppKit.framework in Frameworks */,
+				DE2421BB6B7E39254103CE2C /* CoreMedia.framework in Frameworks */,
+				D6CDED1E3EC4544B7B7917F7 /* CoreVideo.framework in Frameworks */,
+				44CEAEB6023A81F8FF2AD80D /* CoreAudio.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		01C548AC54D1890F5B0B0676 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				58346526337ABF7F29BC2195 /* TabRecordApp.app */,
+				89CAC22B9161A4CF3E744AD7 /* TabRecordAppTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		34377ADEFF406AEED356C24E = {
+			isa = PBXGroup;
+			children = (
+				DD8EBEC83C572CB68D41EA94 /* TabRecordApp */,
+				8CDFC1C4E521EF41AA2D9CD6 /* TabRecordAppTests */,
+				4373F22245E064DA3FB30A12 /* Frameworks */,
+				01C548AC54D1890F5B0B0676 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4373F22245E064DA3FB30A12 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C5635AD379258CCC0BEFC6F0 /* AppKit.framework */,
+				2D565FB46FF6B13B371E3D58 /* AVFoundation.framework */,
+				AA472BAF1F892CD0D8842D45 /* CoreAudio.framework */,
+				19A673B99F7ED1479A126010 /* CoreMedia.framework */,
+				94B2A2F429BA7B7FFE70E8D1 /* CoreVideo.framework */,
+				67AA39C1F0C35DA9DB5B591F /* ScreenCaptureKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8CDFC1C4E521EF41AA2D9CD6 /* TabRecordAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				DCE7E336DFFDFFCECAD0A4CE /* AVAudioPCMBufferTests.swift */,
+				4EA1219B6E77D1FD4AEC130D /* CMTimeConverterTests.swift */,
+				731741A13DA3FE8E7FD926D4 /* OutputFileNamerTests.swift */,
+			);
+			path = TabRecordAppTests;
+			sourceTree = "<group>";
+		};
+		DD8EBEC83C572CB68D41EA94 /* TabRecordApp */ = {
+			isa = PBXGroup;
+			children = (
+				A09C3291A9B86B577AFAD919 /* AppDelegate.swift */,
+				A2CAB7DAE9883C1E1FDCCFAC /* Assets.xcassets */,
+				D293B314AE9AD2409B1DFBD2 /* AVAudioPCMBuffer+CMSampleBuffer.swift */,
+				8BA13C13FB13A3EA4361C34A /* CMTimeConverter.swift */,
+				0980A1028C9312BEA1C7651F /* Info.plist */,
+				B6309A4CBF333300AEA57F6B /* main.swift */,
+				47BC5A6F754661945E93399B /* MenuBarController.swift */,
+				A19623E2941933379CB62ECE /* OutputFileNamer.swift */,
+				689C316799631D368354FE52 /* RecordingEngine.swift */,
+				80C0CB7E02F3387F723DEC94 /* SourcePickerView.swift */,
+				DD8C8972213CD23A2426D94F /* TabRecord.entitlements */,
+			);
+			path = TabRecordApp;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		71814D123DE8DDBAA481AC27 /* TabRecordAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 965420B3361A97CB92284533 /* Build configuration list for PBXNativeTarget "TabRecordAppTests" */;
+			buildPhases = (
+				5D4DD7B82F084FA9E934ECBD /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B7217D034946E99B7D0D714F /* PBXTargetDependency */,
+			);
+			name = TabRecordAppTests;
+			packageProductDependencies = (
+			);
+			productName = TabRecordAppTests;
+			productReference = 89CAC22B9161A4CF3E744AD7 /* TabRecordAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		BB6883497CDD3908433580A4 /* TabRecordApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 398E7913CC8BF59FF54640EB /* Build configuration list for PBXNativeTarget "TabRecordApp" */;
+			buildPhases = (
+				EEDD84341C18C2783EAB6C74 /* Sources */,
+				6E46DDE0F00306B39EF469E9 /* Resources */,
+				A1D7B8CD2FA75BB412141EE5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TabRecordApp;
+			packageProductDependencies = (
+			);
+			productName = TabRecordApp;
+			productReference = 58346526337ABF7F29BC2195 /* TabRecordApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F242E5463E8A65DF393CA6B4 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					BB6883497CDD3908433580A4 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = AF6159B694DFB46EBBBC4481 /* Build configuration list for PBXProject "TabRecordApp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 34377ADEFF406AEED356C24E;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 01C548AC54D1890F5B0B0676 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BB6883497CDD3908433580A4 /* TabRecordApp */,
+				71814D123DE8DDBAA481AC27 /* TabRecordAppTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6E46DDE0F00306B39EF469E9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0738601BC6C18496FF60B82 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5D4DD7B82F084FA9E934ECBD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E01C9E454E7A9FD46883A0A3 /* AVAudioPCMBufferTests.swift in Sources */,
+				F30E062DAF2A27FBA75EA3D2 /* CMTimeConverterTests.swift in Sources */,
+				E56475047F88D4034F370981 /* OutputFileNamerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EEDD84341C18C2783EAB6C74 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA280F9DF903F781C22EA58C /* AVAudioPCMBuffer+CMSampleBuffer.swift in Sources */,
+				D4E9024AE654F23CA6DA39C3 /* AppDelegate.swift in Sources */,
+				4B3829187EF7DDAC310B1C5E /* CMTimeConverter.swift in Sources */,
+				81B5FDFC717C023D9F7D4725 /* MenuBarController.swift in Sources */,
+				1D05C9E0B656DBDB099CB58F /* OutputFileNamer.swift in Sources */,
+				2753D14AFB524DE28EA326E8 /* RecordingEngine.swift in Sources */,
+				B29E3415C87D7887F6D49F98 /* SourcePickerView.swift in Sources */,
+				548410F713DB3CB649DD4D2D /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B7217D034946E99B7D0D714F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BB6883497CDD3908433580A4 /* TabRecordApp */;
+			targetProxy = E967C896DE6D882B53EB44A8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		08310946E74868D79D636F1B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TabRecordApp/TabRecord.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = TabRecordApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tabrecord.app;
+				PRODUCT_NAME = TabRecord;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		29A00132CF354A2461334E0B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		3658E301D541B3D54C1DD143 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = TabRecordApp/TabRecord.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = TabRecordApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tabrecord.app;
+				PRODUCT_NAME = TabRecord;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		5E31A945F7B65FB1A3D240AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tabrecord.TabRecordAppTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TabRecordApp.app/Contents/MacOS/TabRecordApp";
+			};
+			name = Debug;
+		};
+		8D9C46375CCB7D75478F89C7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tabrecord.TabRecordAppTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.9;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TabRecordApp.app/Contents/MacOS/TabRecordApp";
+			};
+			name = Release;
+		};
+		F140743B9718936F2E10525C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		398E7913CC8BF59FF54640EB /* Build configuration list for PBXNativeTarget "TabRecordApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3658E301D541B3D54C1DD143 /* Debug */,
+				08310946E74868D79D636F1B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		965420B3361A97CB92284533 /* Build configuration list for PBXNativeTarget "TabRecordAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5E31A945F7B65FB1A3D240AA /* Debug */,
+				8D9C46375CCB7D75478F89C7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AF6159B694DFB46EBBBC4481 /* Build configuration list for PBXProject "TabRecordApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				29A00132CF354A2461334E0B /* Debug */,
+				F140743B9718936F2E10525C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F242E5463E8A65DF393CA6B4 /* Project object */;
+}

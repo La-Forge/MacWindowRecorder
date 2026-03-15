@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Identity -->
+    <key>CFBundleName</key>
+    <string>TabRecord</string>
+    <key>CFBundleDisplayName</key>
+    <string>TabRecord</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.tabrecord.app</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>TabRecord</string>
+
+    <!-- App type -->
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+    <!-- Hide from Dock — menu bar only app -->
+    <key>LSUIElement</key>
+    <true/>
+
+    <!-- Minimum macOS version -->
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+
+    <!-- Privacy usage descriptions (required for TCC prompts) -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>TabRecord uses the microphone to record your voice as a separate audio track.</string>
+
+    <!-- Assets catalog -->
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+
+    <!-- High-resolution display support -->
+    <key>NSHighResolutionCapable</key>
+    <true/>
+</dict>
+</plist>
