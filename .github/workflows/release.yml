@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build release app
+        run: |
+          xcodebuild \
+            -project TabRecordApp.xcodeproj \
+            -scheme TabRecordApp \
+            -configuration Release \
+            -derivedDataPath .build \
+            -quiet
+
+      - name: Zip app bundle
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ditto -c -k --keepParent \
+            .build/Build/Products/Release/TabRecord.app \
+            TabRecord-$VERSION.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "TabRecord ${{ github.ref_name }}"
+          generate_release_notes: true
+          files: TabRecord-*.zip

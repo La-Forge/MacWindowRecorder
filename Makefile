@@ -1,4 +1,4 @@
-.PHONY: gen build run clean notarize help
+.PHONY: gen build run clean notarize release help
 
 # ── Variables ────────────────────────────────────────────────────────────────
 SCHEME  := TabRecordApp
@@ -31,6 +31,9 @@ run: gen ## Build debug and launch immediately
 		-derivedDataPath $(BUILD) \
 		-quiet
 	open $(BUILD)/Build/Products/Debug/TabRecord.app
+
+release: ## Bump version and release (PART=major|minor|patch, default: patch)
+	./scripts/bump.sh $(or $(PART),patch)
 
 clean: ## Remove derived data
 	rm -rf $(BUILD)
