@@ -50,8 +50,15 @@ final class RecordingEngine: NSObject {
     private var assetWriter: AVAssetWriter?
     private var videoInput: AVAssetWriterInput?
     private var videoAdaptor: AVAssetWriterInputPixelBufferAdaptor?
-    private var audioSourceInput: AVAssetWriterInput?  // track 1 — app/screen audio
-    private var audioMicInput: AVAssetWriterInput?     // track 2 — microphone
+    private var audioMixedInput: AVAssetWriterInput?   // track 1 — mixed (default playback)
+    private var audioSourceInput: AVAssetWriterInput?  // track 2 — app/screen audio
+    private var audioMicInput: AVAssetWriterInput?     // track 3 — microphone
+
+    // Most-recent mic buffer, updated on the audio engine thread and read on
+    // the SCStream audio queue. A simple atomic store is sufficient here
+    // because we only need the latest sample for mixing (no strict ordering
+    // guarantee required beyond what the OS provides for pointer-sized stores).
+    private var latestMicBuffer: AVAudioPCMBuffer?
 
     private var sessionStarted = false
     private let sessionLock = NSLock()
@@ -141,7 +148,20 @@ final class RecordingEngine: NSObject {
             ]
         )
 
-        // --- Audio source input: AAC stereo, track 1 ----------------------------
+        // --- Audio mixed input: AAC stereo, track 1 (default playback) ----------
+        // L = speaker, R = mic. Added first so QuickTime and most players treat
+        // it as the default track.
+        let audioMixedSettings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVSampleRateKey: 48000,
+            AVNumberOfChannelsKey: 2,
+            AVEncoderBitRateKey: 192_000,
+        ]
+        let audioMixedInput = AVAssetWriterInput(
+            mediaType: .audio, outputSettings: audioMixedSettings)
+        audioMixedInput.expectsMediaDataInRealTime = true
+
+        // --- Audio source input: AAC stereo, track 2 ----------------------------
         let audioSourceSettings: [String: Any] = [
             AVFormatIDKey: kAudioFormatMPEG4AAC,
             AVSampleRateKey: 48000,
@@ -152,7 +172,7 @@ final class RecordingEngine: NSObject {
             mediaType: .audio, outputSettings: audioSourceSettings)
         audioSourceInput.expectsMediaDataInRealTime = true
 
-        // --- Audio mic input: AAC mono, track 2 ---------------------------------
+        // --- Audio mic input: AAC mono, track 3 ---------------------------------
         let audioMicSettings: [String: Any] = [
             AVFormatIDKey: kAudioFormatMPEG4AAC,
             AVSampleRateKey: 48000,
@@ -164,6 +184,7 @@ final class RecordingEngine: NSObject {
         audioMicInput.expectsMediaDataInRealTime = true
 
         guard writer.canAdd(videoInput),
+              writer.canAdd(audioMixedInput),
               writer.canAdd(audioSourceInput),
               writer.canAdd(audioMicInput)
         else {
@@ -172,12 +193,14 @@ final class RecordingEngine: NSObject {
         }
 
         writer.add(videoInput)
-        writer.add(audioSourceInput)
-        writer.add(audioMicInput)
+        writer.add(audioMixedInput)   // track 1 — default playback
+        writer.add(audioSourceInput)  // track 2 — clean speaker
+        writer.add(audioMicInput)     // track 3 — clean mic
 
         self.assetWriter = writer
         self.videoInput = videoInput
         self.videoAdaptor = videoAdaptor
+        self.audioMixedInput = audioMixedInput
         self.audioSourceInput = audioSourceInput
         self.audioMicInput = audioMicInput
     }
@@ -217,14 +240,16 @@ final class RecordingEngine: NSObject {
         let engine = AVAudioEngine()
         let inputNode = engine.inputNode
 
-        // Use the hardware format to avoid resampling artefacts.
-        // AVAssetWriter will handle conversion to the output AAC format.
-        let inputFormat = inputNode.inputFormat(forBus: 0)
+        // Use the output-bus format (non-interleaved float32 at hardware rate).
+        // inputFormat(forBus:) can return an HFP Bluetooth rate (8/16 kHz)
+        // under AirPods, causing a format mismatch that silences the tap.
+        // outputFormat(forBus:) is always non-interleaved float32.
+        let tapFormat = inputNode.outputFormat(forBus: 0)
 
         inputNode.installTap(
             onBus: 0,
             bufferSize: 4096,
-            format: inputFormat
+            format: tapFormat
         ) { [weak self] buffer, time in
             self?.processMicBuffer(buffer, time: time)
         }
@@ -242,6 +267,9 @@ final class RecordingEngine: NSObject {
 
     /// Called from AVAudioEngine's internal audio thread — keep it fast.
     private func processMicBuffer(_ buffer: AVAudioPCMBuffer, time: AVAudioTime) {
+        // Stash for mixing in handleAudioSourceSample (best-effort: latest wins).
+        latestMicBuffer = buffer
+
         guard let micInput = audioMicInput,
               micInput.isReadyForMoreMediaData,
               isSessionStarted()
@@ -274,6 +302,7 @@ final class RecordingEngine: NSObject {
 
     private func finaliseWriter() async {
         videoInput?.markAsFinished()
+        audioMixedInput?.markAsFinished()
         audioSourceInput?.markAsFinished()
         audioMicInput?.markAsFinished()
 
@@ -284,8 +313,10 @@ final class RecordingEngine: NSObject {
         assetWriter = nil
         videoInput = nil
         videoAdaptor = nil
+        audioMixedInput = nil
         audioSourceInput = nil
         audioMicInput = nil
+        latestMicBuffer = nil
     }
 
 }
@@ -344,12 +375,28 @@ extension RecordingEngine: SCStreamOutput {
     }
 
     private func handleAudioSourceSample(_ sampleBuffer: CMSampleBuffer) {
-        guard let input = audioSourceInput,
-              input.isReadyForMoreMediaData,
-              isSessionStarted()
-        else { return }
+        guard isSessionStarted() else { return }
 
-        input.append(sampleBuffer)
+        // Track 2: clean speaker audio.
+        if let sourceInput = audioSourceInput, sourceInput.isReadyForMoreMediaData {
+            sourceInput.append(sampleBuffer)
+        }
+
+        // Track 1: mixed (L=speaker, R=mic). Uses the speaker's PTS for sync.
+        if let mixedInput = audioMixedInput,
+           mixedInput.isReadyForMoreMediaData,
+           let speakerPCM = sampleBuffer.asPCMBuffer(),
+           let micPCM = latestMicBuffer
+        {
+            let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+
+            // Downmix speaker to mono if it doesn't match the mono mic layout
+            // expected by AudioMixer (which reads ch[0] of a stereo speaker buffer).
+            let mixed = AudioMixer.mix(speaker: speakerPCM, mic: micPCM)
+            if let mixedSB = mixed.cmSampleBuffer(presentationTime: pts) {
+                mixedInput.append(mixedSB)
+            }
+        }
     }
 }
 

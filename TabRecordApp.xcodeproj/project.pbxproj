@@ -12,6 +12,8 @@
 		44CEAEB6023A81F8FF2AD80D /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA472BAF1F892CD0D8842D45 /* CoreAudio.framework */; };
 		4B3829187EF7DDAC310B1C5E /* CMTimeConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BA13C13FB13A3EA4361C34A /* CMTimeConverter.swift */; };
 		548410F713DB3CB649DD4D2D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6309A4CBF333300AEA57F6B /* main.swift */; };
+		72A762F1822D103C1BE2F41C /* CMSampleBuffer+AVAudioPCMBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E6C00A9B088B0575EEC38F /* CMSampleBuffer+AVAudioPCMBuffer.swift */; };
+		756952B9F4892C8DD106F0AA /* CMSampleBufferAsPCMBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70F08F35071610A5999717DD /* CMSampleBufferAsPCMBufferTests.swift */; };
 		805A9FB3EA8C7EF3FF1FC667 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D565FB46FF6B13B371E3D58 /* AVFoundation.framework */; };
 		81B5FDFC717C023D9F7D4725 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47BC5A6F754661945E93399B /* MenuBarController.swift */; };
 		865FD721029BC885CEBE029D /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5635AD379258CCC0BEFC6F0 /* AppKit.framework */; };
@@ -23,8 +25,10 @@
 		DC8CD5DE7EA85FC8EC291451 /* ScreenCaptureKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 67AA39C1F0C35DA9DB5B591F /* ScreenCaptureKit.framework */; };
 		DE2421BB6B7E39254103CE2C /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 19A673B99F7ED1479A126010 /* CoreMedia.framework */; };
 		E01C9E454E7A9FD46883A0A3 /* AVAudioPCMBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE7E336DFFDFFCECAD0A4CE /* AVAudioPCMBufferTests.swift */; };
+		E19D3FD00190B12EADB4D848 /* AudioMixerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4C5AE6019C56ABB2EFEA026 /* AudioMixerTests.swift */; };
 		E56475047F88D4034F370981 /* OutputFileNamerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 731741A13DA3FE8E7FD926D4 /* OutputFileNamerTests.swift */; };
 		F30E062DAF2A27FBA75EA3D2 /* CMTimeConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA1219B6E77D1FD4AEC130D /* CMTimeConverterTests.swift */; };
+		F399573EE19D5296121695D1 /* AudioMixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC8F2BE173F7736E506B02B /* AudioMixer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,13 +44,16 @@
 /* Begin PBXFileReference section */
 		0980A1028C9312BEA1C7651F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		19A673B99F7ED1479A126010 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		29E6C00A9B088B0575EEC38F /* CMSampleBuffer+AVAudioPCMBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CMSampleBuffer+AVAudioPCMBuffer.swift"; sourceTree = "<group>"; };
 		2D565FB46FF6B13B371E3D58 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		47BC5A6F754661945E93399B /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
 		4EA1219B6E77D1FD4AEC130D /* CMTimeConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMTimeConverterTests.swift; sourceTree = "<group>"; };
 		58346526337ABF7F29BC2195 /* TabRecordApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TabRecordApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		67AA39C1F0C35DA9DB5B591F /* ScreenCaptureKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScreenCaptureKit.framework; path = System/Library/Frameworks/ScreenCaptureKit.framework; sourceTree = SDKROOT; };
 		689C316799631D368354FE52 /* RecordingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingEngine.swift; sourceTree = "<group>"; };
+		70F08F35071610A5999717DD /* CMSampleBufferAsPCMBufferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMSampleBufferAsPCMBufferTests.swift; sourceTree = "<group>"; };
 		731741A13DA3FE8E7FD926D4 /* OutputFileNamerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileNamerTests.swift; sourceTree = "<group>"; };
+		7EC8F2BE173F7736E506B02B /* AudioMixer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMixer.swift; sourceTree = "<group>"; };
 		80C0CB7E02F3387F723DEC94 /* SourcePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourcePickerView.swift; sourceTree = "<group>"; };
 		89CAC22B9161A4CF3E744AD7 /* TabRecordAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TabRecordAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BA13C13FB13A3EA4361C34A /* CMTimeConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMTimeConverter.swift; sourceTree = "<group>"; };
@@ -54,6 +61,7 @@
 		A09C3291A9B86B577AFAD919 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A19623E2941933379CB62ECE /* OutputFileNamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileNamer.swift; sourceTree = "<group>"; };
 		A2CAB7DAE9883C1E1FDCCFAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A4C5AE6019C56ABB2EFEA026 /* AudioMixerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMixerTests.swift; sourceTree = "<group>"; };
 		AA472BAF1F892CD0D8842D45 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		B6309A4CBF333300AEA57F6B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C5635AD379258CCC0BEFC6F0 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -114,7 +122,9 @@
 		8CDFC1C4E521EF41AA2D9CD6 /* TabRecordAppTests */ = {
 			isa = PBXGroup;
 			children = (
+				A4C5AE6019C56ABB2EFEA026 /* AudioMixerTests.swift */,
 				DCE7E336DFFDFFCECAD0A4CE /* AVAudioPCMBufferTests.swift */,
+				70F08F35071610A5999717DD /* CMSampleBufferAsPCMBufferTests.swift */,
 				4EA1219B6E77D1FD4AEC130D /* CMTimeConverterTests.swift */,
 				731741A13DA3FE8E7FD926D4 /* OutputFileNamerTests.swift */,
 			);
@@ -126,7 +136,9 @@
 			children = (
 				A09C3291A9B86B577AFAD919 /* AppDelegate.swift */,
 				A2CAB7DAE9883C1E1FDCCFAC /* Assets.xcassets */,
+				7EC8F2BE173F7736E506B02B /* AudioMixer.swift */,
 				D293B314AE9AD2409B1DFBD2 /* AVAudioPCMBuffer+CMSampleBuffer.swift */,
+				29E6C00A9B088B0575EEC38F /* CMSampleBuffer+AVAudioPCMBuffer.swift */,
 				8BA13C13FB13A3EA4361C34A /* CMTimeConverter.swift */,
 				0980A1028C9312BEA1C7651F /* Info.plist */,
 				B6309A4CBF333300AEA57F6B /* main.swift */,
@@ -231,6 +243,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E01C9E454E7A9FD46883A0A3 /* AVAudioPCMBufferTests.swift in Sources */,
+				E19D3FD00190B12EADB4D848 /* AudioMixerTests.swift in Sources */,
+				756952B9F4892C8DD106F0AA /* CMSampleBufferAsPCMBufferTests.swift in Sources */,
 				F30E062DAF2A27FBA75EA3D2 /* CMTimeConverterTests.swift in Sources */,
 				E56475047F88D4034F370981 /* OutputFileNamerTests.swift in Sources */,
 			);
@@ -242,6 +256,8 @@
 			files = (
 				AA280F9DF903F781C22EA58C /* AVAudioPCMBuffer+CMSampleBuffer.swift in Sources */,
 				D4E9024AE654F23CA6DA39C3 /* AppDelegate.swift in Sources */,
+				F399573EE19D5296121695D1 /* AudioMixer.swift in Sources */,
+				72A762F1822D103C1BE2F41C /* CMSampleBuffer+AVAudioPCMBuffer.swift in Sources */,
 				4B3829187EF7DDAC310B1C5E /* CMTimeConverter.swift in Sources */,
 				81B5FDFC717C023D9F7D4725 /* MenuBarController.swift in Sources */,
 				1D05C9E0B656DBDB099CB58F /* OutputFileNamer.swift in Sources */,
