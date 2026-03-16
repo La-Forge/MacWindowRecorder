@@ -29,6 +29,7 @@
 		E56475047F88D4034F370981 /* OutputFileNamerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 731741A13DA3FE8E7FD926D4 /* OutputFileNamerTests.swift */; };
 		F30E062DAF2A27FBA75EA3D2 /* CMTimeConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA1219B6E77D1FD4AEC130D /* CMTimeConverterTests.swift */; };
 		F399573EE19D5296121695D1 /* AudioMixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC8F2BE173F7736E506B02B /* AudioMixer.swift */; };
+		F53C189A7532470EAD5C2EC0 /* MicRingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB3CA4C564C73BFBC43709B2 /* MicRingBuffer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +67,7 @@
 		B6309A4CBF333300AEA57F6B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C5635AD379258CCC0BEFC6F0 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		D293B314AE9AD2409B1DFBD2 /* AVAudioPCMBuffer+CMSampleBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVAudioPCMBuffer+CMSampleBuffer.swift"; sourceTree = "<group>"; };
+		DB3CA4C564C73BFBC43709B2 /* MicRingBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicRingBuffer.swift; sourceTree = "<group>"; };
 		DCE7E336DFFDFFCECAD0A4CE /* AVAudioPCMBufferTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioPCMBufferTests.swift; sourceTree = "<group>"; };
 		DD8C8972213CD23A2426D94F /* TabRecord.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TabRecord.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -143,6 +145,7 @@
 				0980A1028C9312BEA1C7651F /* Info.plist */,
 				B6309A4CBF333300AEA57F6B /* main.swift */,
 				47BC5A6F754661945E93399B /* MenuBarController.swift */,
+				DB3CA4C564C73BFBC43709B2 /* MicRingBuffer.swift */,
 				A19623E2941933379CB62ECE /* OutputFileNamer.swift */,
 				689C316799631D368354FE52 /* RecordingEngine.swift */,
 				80C0CB7E02F3387F723DEC94 /* SourcePickerView.swift */,
@@ -260,6 +263,7 @@
 				72A762F1822D103C1BE2F41C /* CMSampleBuffer+AVAudioPCMBuffer.swift in Sources */,
 				4B3829187EF7DDAC310B1C5E /* CMTimeConverter.swift in Sources */,
 				81B5FDFC717C023D9F7D4725 /* MenuBarController.swift in Sources */,
+				F53C189A7532470EAD5C2EC0 /* MicRingBuffer.swift in Sources */,
 				1D05C9E0B656DBDB099CB58F /* OutputFileNamer.swift in Sources */,
 				2753D14AFB524DE28EA326E8 /* RecordingEngine.swift in Sources */,
 				B29E3415C87D7887F6D49F98 /* SourcePickerView.swift in Sources */,

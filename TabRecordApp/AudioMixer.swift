@@ -23,9 +23,19 @@ enum AudioMixer {
     /// - Returns: A stereo, non-interleaved float32 `AVAudioPCMBuffer` at the
     ///   same sample rate as `speaker`.
     static func mix(speaker: AVAudioPCMBuffer, mic: AVAudioPCMBuffer) -> AVAudioPCMBuffer {
-        let frameCount = min(speaker.frameLength, mic.frameLength)
         let sampleRate = speaker.format.sampleRate
 
+        // Resample mic to speaker's sample rate if they differ (e.g. mic at
+        // 44.1 kHz hardware rate vs SCStream at 48 kHz). Without this the mic
+        // samples are pasted at the wrong indices, producing a robotic effect.
+        let micResampled: AVAudioPCMBuffer
+        if mic.format.sampleRate != sampleRate {
+            micResampled = resample(mic, to: sampleRate) ?? mic
+        } else {
+            micResampled = mic
+        }
+
+        let frameCount = min(speaker.frameLength, micResampled.frameLength)
         let outFormat = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 2)!
         let output = AVAudioPCMBuffer(pcmFormat: outFormat, frameCapacity: frameCount)!
         output.frameLength = frameCount
@@ -33,7 +43,7 @@ enum AudioMixer {
         let outL = output.floatChannelData![0]
         let outR = output.floatChannelData![1]
         let spL  = speaker.floatChannelData![0]
-        let micC = mic.floatChannelData![0]
+        let micC = micResampled.floatChannelData![0]
 
         for i in 0..<Int(frameCount) {
             outL[i] = spL[i]
@@ -41,5 +51,39 @@ enum AudioMixer {
         }
 
         return output
+    }
+
+    // MARK: - Private
+
+    /// Resample `buffer` to `targetRate` using AVAudioConverter.
+    /// Returns nil if conversion setup fails (falls back to original rate at call site).
+    private static func resample(_ buffer: AVAudioPCMBuffer, to targetRate: Double) -> AVAudioPCMBuffer? {
+        guard let dstFormat = AVAudioFormat(
+            standardFormatWithSampleRate: targetRate,
+            channels: buffer.format.channelCount
+        ),
+        let converter = AVAudioConverter(from: buffer.format, to: dstFormat)
+        else { return nil }
+
+        // Compute output frame count proportionally.
+        let ratio = targetRate / buffer.format.sampleRate
+        let dstFrameCapacity = AVAudioFrameCount(Double(buffer.frameLength) * ratio + 1)
+        guard let dst = AVAudioPCMBuffer(pcmFormat: dstFormat, frameCapacity: dstFrameCapacity)
+        else { return nil }
+
+        var consumed = false
+        var error: NSError?
+        let inputBlock: AVAudioConverterInputBlock = { _, outStatus in
+            if consumed {
+                outStatus.pointee = .noDataNow
+                return nil
+            }
+            outStatus.pointee = .haveData
+            consumed = true
+            return buffer
+        }
+        converter.convert(to: dst, error: &error, withInputFrom: inputBlock)
+        guard error == nil, dst.frameLength > 0 else { return nil }
+        return dst
     }
 }

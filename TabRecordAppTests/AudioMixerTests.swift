@@ -139,6 +139,33 @@ final class AudioMixerTests: XCTestCase {
 
     // MARK: - Speaker stereo downmix to left channel
 
+    // MARK: - Sample rate mismatch (mic at 44.1 kHz, speaker at 48 kHz)
+
+    func testMixWithDifferentSampleRatesOutputsAtSpeakerRate() {
+        // Mic hardware may run at 44.1 kHz; speaker is always 48 kHz from SCStream.
+        // The output must be at 48 kHz — not 44.1 kHz — so timestamps stay correct.
+        let speaker = makeStereoBuffer(sampleRate: 48_000, frameLength: 1024)
+        let mic = makeMonoBuffer(sampleRate: 44_100, frameLength: 1024)
+
+        let result = AudioMixer.mix(speaker: speaker, mic: mic)
+
+        XCTAssertEqual(result.format.sampleRate, 48_000)
+    }
+
+    func testMixWithDifferentSampleRatesRightChannelIsNonZero() {
+        // If resampling is skipped the mic samples map to the wrong indices and
+        // the output is effectively silence or truncated. Verify the right channel
+        // has non-zero content after mixing a non-silent mic.
+        let speaker = makeStereoBuffer(sampleRate: 48_000, frameLength: 1024, fillValue: 0.0)
+        let mic = makeMonoBuffer(sampleRate: 44_100, frameLength: 1024, fillValue: 0.5)
+
+        let result = AudioMixer.mix(speaker: speaker, mic: mic)
+
+        let right = result.floatChannelData![1]
+        let hasNonZero = (0..<Int(result.frameLength)).contains { right[$0] != 0.0 }
+        XCTAssertTrue(hasNonZero, "Right channel (mic) should be non-zero after resampling")
+    }
+
     func testSpeakerStereoAveragedIntoLeftChannel() {
         // Speaker L=1.0, R=0.0 — left channel of mix must carry speaker's L channel
         let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 2)!

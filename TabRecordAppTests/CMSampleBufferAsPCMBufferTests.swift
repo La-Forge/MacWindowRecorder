@@ -125,6 +125,111 @@ final class CMSampleBufferAsPCMBufferTests: XCTestCase {
         return sb!
     }
 
+    /// Build a block-buffer-backed CMSampleBuffer, matching what SCStream delivers.
+    /// (The ABL-backed helper above uses CMSampleBufferSetDataBufferFromAudioBufferList
+    /// which is NOT what SCStream uses — SCStream wraps raw PCM in a CMBlockBuffer.)
+    private func makeBlockBufferBackedCMSampleBuffer(
+        channelCount: UInt32 = 2,
+        sampleRate: Float64 = 48_000,
+        frameCount: Int = 1024,
+        fillValue: Float = 0.5
+    ) -> CMSampleBuffer {
+        var asbd = AudioStreamBasicDescription()
+        asbd.mSampleRate = sampleRate
+        asbd.mFormatID = kAudioFormatLinearPCM
+        asbd.mBitsPerChannel = 32
+        asbd.mChannelsPerFrame = channelCount
+        // Non-interleaved float32 — SCStream's default layout
+        asbd.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked
+            | kAudioFormatFlagIsNonInterleaved
+        asbd.mBytesPerFrame = 4
+        asbd.mBytesPerPacket = 4
+        asbd.mFramesPerPacket = 1
+
+        let bytesPerChannel = frameCount * 4
+        let totalBytes = bytesPerChannel * Int(channelCount)
+
+        // Allocate a CMBlockBuffer and fill with fillValue
+        var blockBuffer: CMBlockBuffer?
+        CMBlockBufferCreateWithMemoryBlock(
+            allocator: kCFAllocatorDefault,
+            memoryBlock: nil,
+            blockLength: totalBytes,
+            blockAllocator: kCFAllocatorDefault,
+            customBlockSource: nil,
+            offsetToData: 0,
+            dataLength: totalBytes,
+            flags: 0,
+            blockBufferOut: &blockBuffer
+        )
+        CMBlockBufferAssureBlockMemory(blockBuffer!)
+        var dataPtr: UnsafeMutablePointer<Int8>?
+        var dataLength = 0
+        CMBlockBufferGetDataPointer(blockBuffer!, atOffset: 0, lengthAtOffsetOut: nil,
+                                    totalLengthOut: &dataLength, dataPointerOut: &dataPtr)
+        if let p = dataPtr {
+            let floatPtr = UnsafeMutableRawPointer(p).bindMemory(to: Float.self, capacity: totalBytes / 4)
+            for i in 0..<(totalBytes / 4) { floatPtr[i] = fillValue }
+        }
+
+        var fmtDesc: CMAudioFormatDescription?
+        CMAudioFormatDescriptionCreate(allocator: kCFAllocatorDefault, asbd: &asbd,
+                                       layoutSize: 0, layout: nil, magicCookieSize: 0,
+                                       magicCookie: nil, extensions: nil,
+                                       formatDescriptionOut: &fmtDesc)
+
+        var timing = CMSampleTimingInfo(
+            duration: CMTime(value: 1, timescale: CMTimeScale(sampleRate)),
+            presentationTimeStamp: .zero,
+            decodeTimeStamp: .invalid
+        )
+        let sampleSize = bytesPerChannel  // per-channel bytes = one "sample" in non-interleaved
+        var sb: CMSampleBuffer?
+        CMSampleBufferCreate(
+            allocator: kCFAllocatorDefault,
+            dataBuffer: blockBuffer,
+            dataReady: true,
+            makeDataReadyCallback: nil,
+            refcon: nil,
+            formatDescription: fmtDesc,
+            sampleCount: frameCount,
+            sampleTimingEntryCount: 1,
+            sampleTimingArray: &timing,
+            sampleSizeEntryCount: 1,
+            sampleSizeArray: [sampleSize],
+            sampleBufferOut: &sb
+        )
+        return sb!
+    }
+
+    // MARK: - Block-buffer-backed (real SCStream format)
+
+    func testBlockBufferBackedNonInterleavedReturnsNonNil() {
+        let sb = makeBlockBufferBackedCMSampleBuffer()
+        XCTAssertNotNil(sb.asPCMBuffer())
+    }
+
+    func testBlockBufferBackedPreservesChannelCount() {
+        let sb = makeBlockBufferBackedCMSampleBuffer(channelCount: 2)
+        XCTAssertEqual(sb.asPCMBuffer()!.format.channelCount, 2)
+    }
+
+    func testBlockBufferBackedPreservesFrameCount() {
+        let sb = makeBlockBufferBackedCMSampleBuffer(frameCount: 512)
+        XCTAssertEqual(sb.asPCMBuffer()!.frameLength, 512)
+    }
+
+    func testBlockBufferBackedOutputIsNonInterleaved() {
+        let sb = makeBlockBufferBackedCMSampleBuffer()
+        XCTAssertFalse(sb.asPCMBuffer()!.format.isInterleaved)
+    }
+
+    func testBlockBufferBackedPreservesSampleData() {
+        let sb = makeBlockBufferBackedCMSampleBuffer(frameCount: 64, fillValue: 0.6)
+        let pcm = sb.asPCMBuffer()!
+        XCTAssertEqual(pcm.floatChannelData![0][0], 0.6, accuracy: 1e-6)
+    }
+
     // MARK: - Non-interleaved (SCStream default)
 
     func testNonInterleavedBufferReturnsNonNil() {

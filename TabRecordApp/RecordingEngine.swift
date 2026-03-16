@@ -2,7 +2,10 @@ import AVFoundation
 import CoreAudio
 import CoreMedia
 import CoreVideo
+import OSLog
 import ScreenCaptureKit
+
+private let audioLog = Logger(subsystem: "com.tabrecord", category: "audio")
 
 // MARK: - Recording source
 
@@ -54,11 +57,10 @@ final class RecordingEngine: NSObject {
     private var audioSourceInput: AVAssetWriterInput?  // track 2 — app/screen audio
     private var audioMicInput: AVAssetWriterInput?     // track 3 — microphone
 
-    // Most-recent mic buffer, updated on the audio engine thread and read on
-    // the SCStream audio queue. A simple atomic store is sufficient here
-    // because we only need the latest sample for mixing (no strict ordering
-    // guarantee required beyond what the OS provides for pointer-sized stores).
-    private var latestMicBuffer: AVAudioPCMBuffer?
+    // Ring buffer of mic samples fed by AVAudioEngine tap, drained by the
+    // SCStream audio queue during mixing. Protected by micRingLock.
+    private let micRing = MicRingBuffer()
+    private let micRingLock = NSLock()
 
     private var sessionStarted = false
     private let sessionLock = NSLock()
@@ -81,6 +83,7 @@ final class RecordingEngine: NSObject {
     func startRecording(source: RecordingSource, outputURL: URL) async throws {
         // Clean slate
         sessionStarted = false
+        micRing.reset()
 
         // 1. Build the AVAssetWriter (synchronous, fast)
         try setupAssetWriter(outputURL: outputURL)
@@ -267,8 +270,13 @@ final class RecordingEngine: NSObject {
 
     /// Called from AVAudioEngine's internal audio thread — keep it fast.
     private func processMicBuffer(_ buffer: AVAudioPCMBuffer, time: AVAudioTime) {
-        // Stash for mixing in handleAudioSourceSample (best-effort: latest wins).
-        latestMicBuffer = buffer
+        micRingLock.lock()
+        let isFirst = micRing.isEmpty
+        micRing.push(buffer)
+        micRingLock.unlock()
+        if isFirst {
+            audioLog.info("mic tap first buffer: sampleRate=\(buffer.format.sampleRate) channels=\(buffer.format.channelCount) frames=\(buffer.frameLength)")
+        }
 
         guard let micInput = audioMicInput,
               micInput.isReadyForMoreMediaData,
@@ -278,6 +286,14 @@ final class RecordingEngine: NSObject {
         let pts = CMTimeConverter.cmTime(from: time, sampleRate: buffer.format.sampleRate)
         guard let sampleBuffer = buffer.cmSampleBuffer(presentationTime: pts) else { return }
         micInput.append(sampleBuffer)
+    }
+
+    private func silentMonoBuffer(frameCount: AVAudioFrameCount, sampleRate: Double) -> AVAudioPCMBuffer {
+        let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
+        let buf = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount)!
+        buf.frameLength = frameCount
+        // floatChannelData is zero-initialised by AVAudioPCMBuffer
+        return buf
     }
 
     // MARK: - Session management
@@ -316,7 +332,8 @@ final class RecordingEngine: NSObject {
         audioMixedInput = nil
         audioSourceInput = nil
         audioMicInput = nil
-        latestMicBuffer = nil
+        // No lock needed — all capture queues are stopped before finaliseWriter runs.
+        micRing.reset()
     }
 
 }
@@ -383,18 +400,30 @@ extension RecordingEngine: SCStreamOutput {
         }
 
         // Track 1: mixed (L=speaker, R=mic). Uses the speaker's PTS for sync.
+        // Always written — even without mic yet (right channel stays silent until
+        // mic tap fires). AVAssetWriter drops tracks that receive zero samples,
+        // so we must not gate on latestMicBuffer.
         if let mixedInput = audioMixedInput,
-           mixedInput.isReadyForMoreMediaData,
-           let speakerPCM = sampleBuffer.asPCMBuffer(),
-           let micPCM = latestMicBuffer
+           mixedInput.isReadyForMoreMediaData
         {
             let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            if let speakerPCM = sampleBuffer.asPCMBuffer() {
+                let speakerRate = speakerPCM.format.sampleRate
+                let neededFrames = speakerPCM.frameLength
 
-            // Downmix speaker to mono if it doesn't match the mono mic layout
-            // expected by AudioMixer (which reads ch[0] of a stereo speaker buffer).
-            let mixed = AudioMixer.mix(speaker: speakerPCM, mic: micPCM)
-            if let mixedSB = mixed.cmSampleBuffer(presentationTime: pts) {
-                mixedInput.append(mixedSB)
+                micRingLock.lock()
+                let mic = micRing.drain(frameCount: neededFrames, targetSampleRate: speakerRate)
+                    ?? silentMonoBuffer(frameCount: neededFrames, sampleRate: speakerRate)
+                micRingLock.unlock()
+
+                let mixed = AudioMixer.mix(speaker: speakerPCM, mic: mic)
+                if let mixedSB = mixed.cmSampleBuffer(presentationTime: pts) {
+                    mixedInput.append(mixedSB)
+                } else {
+                    audioLog.error("mix: cmSampleBuffer() returned nil")
+                }
+            } else {
+                audioLog.error("mix: asPCMBuffer() returned nil for speaker buffer")
             }
         }
     }
