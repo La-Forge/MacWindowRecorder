@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(xcodebuild -project TabRecordApp.xcodeproj -scheme TabRecordApp -destination 'platform=macOS' -configuration Debug test)"
-    ]
-  }
-}
