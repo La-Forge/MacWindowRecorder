@@ -49,4 +49,4 @@ jobs:
         with:
           name: "TabRecord ${{ github.ref_name }}"
           generate_release_notes: true
-          files: TabRecord-*.dmg
+          files: TabRecord.dmg
