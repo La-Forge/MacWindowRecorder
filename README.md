@@ -5,7 +5,7 @@ tracks (source audio + microphone) using ScreenCaptureKit and AVFoundation.
 
 ## Installation
 
-**[Download TabRecord-1.0.2.dmg](https://github.com/La-Forge/MacWindowRecorder/releases/latest)**
+**[Download TabRecord.dmg](https://github.com/La-Forge/MacWindowRecorder/releases/latest/download/TabRecord.dmg)**
 
 1. Open the DMG
 2. Drag **TabRecord** into the **Applications** folder
