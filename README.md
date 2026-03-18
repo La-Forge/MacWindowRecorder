@@ -1,32 +1,49 @@
-# TabRecord — Native App (Phase 2)
+# TabRecord
 
 macOS menu bar app that records any **window or display** with separate audio
 tracks (source audio + microphone) using ScreenCaptureKit and AVFoundation.
 
-## Download
+## Installation
 
-**[TabRecord-1.0.1.dmg](https://github.com/La-Forge/MacWindowRecorder/releases/download/v1.0.1/TabRecord-1.0.1.dmg)**
+**[Download TabRecord-1.0.2.dmg](https://github.com/La-Forge/MacWindowRecorder/releases/latest)**
 
-Open the DMG, drag **TabRecord** into the **Applications** folder, then launch it from Applications or Spotlight.
+1. Open the DMG
+2. Drag **TabRecord** into the **Applications** folder
+3. Launch it from Applications or Spotlight
 
-> Always download the latest release from the [Releases page](https://github.com/La-Forge/MacWindowRecorder/releases/latest).
+> **Tip — use earphones while recording.** TabRecord captures microphone and speaker audio on separate tracks. If you use speakers instead of earphones, your mic will pick up the speaker audio and create echo or bleed between the two audio channels.
 
 ## Requirements
 
-| Requirement | Version |
+macOS **13.0 (Ventura)** or later.
+
+> **Why macOS 13?** `SCStreamOutputType.audio` (separate screen audio from SCStream) was introduced in macOS 13.
+
+## First launch — permissions
+
+The app requests two permissions on first launch:
+
+1. **Screen Recording** — granted via System Settings → Privacy & Security → Screen Recording
+2. **Microphone** — a system alert appears automatically
+
+To re-grant a denied permission: System Settings → Privacy & Security → toggle TabRecord.
+
+---
+
+## Building from source
+
+### Prerequisites
+
+| Tool | Version |
 |---|---|
-| macOS | **13.0 (Ventura)** or later |
 | Xcode | 15.0+ |
 | XcodeGen | 2.x (`brew install xcodegen`) |
-| Apple Developer account | Required for distribution / notarization only |
+| Apple Developer account | Required for notarization only |
 
-> **Why macOS 13?** `SCStreamOutputType.audio` (separate audio output from
-> SCStream) was introduced in macOS 13. On macOS 12 only video is available.
-
-## Quick start
+### Quick start
 
 ```bash
-# 1. Install XcodeGen if you don't have it
+# 1. Install XcodeGen
 brew install xcodegen
 
 # 2. Generate the Xcode project
@@ -37,51 +54,13 @@ make gen
 open TabRecordApp.xcodeproj
 ```
 
-Or build + launch in one command:
+Or build and launch in one command:
 
 ```bash
 make run
 ```
 
-## First launch — permissions
-
-The app requests two TCC permissions on first launch:
-
-1. **Screen Recording** — granted via System Settings → Privacy & Security → Screen Recording
-2. **Microphone** — a system alert appears automatically
-
-If you deny either and want to re-grant it, go to System Settings → Privacy & Security and toggle the entry for TabRecord.
-
-## Architecture
-
-```
-main.swift
-  └── AppDelegate           ← sets LSUIElement mode, checks screen capture TCC
-        └── MenuBarController   ← NSStatusItem, menu, duration timer
-              ├── SourcePickerWindowController  ← SwiftUI picker (displays / windows)
-              └── RecordingEngine               ← core capture & write pipeline
-                    ├── SCStream              ← video + source audio (ScreenCaptureKit)
-                    ├── AVAudioEngine         ← microphone tap
-                    └── AVAssetWriter         ← MP4 output, 3 tracks
-```
-
-## Output format
-
-Files are saved in `~/Movies/TabRecord/` with the name pattern:
-
-```
-tabrecord-YYYY-MM-DD-HHmmss.mp4
-```
-
-Verify tracks with ffprobe:
-
-```bash
-ffprobe -v quiet -show_streams -select_streams a tabrecord-2026-03-13-120000.mp4
-```
-
-Expected output: **two audio streams** — `index=1` (source, stereo) and `index=2` (mic, mono).
-
-## Distribution
+### Distribution
 
 ```bash
 # Release build
@@ -93,7 +72,46 @@ APPLE_ID=you@example.com TEAM_ID=XXXXXXXX APP_PASSWORD=xxxx make notarize
 
 See `Makefile` for full notarization details.
 
-## File map
+---
+
+## Output format
+
+Files are saved in `~/Movies/TabRecord/`:
+
+```
+tabrecord-YYYY-MM-DD-HHmmss.mp4
+```
+
+The file contains **three audio tracks**:
+
+| Track | Content |
+|---|---|
+| `index=1` | Mixed (source + mic), stereo |
+| `index=2` | Source audio only, stereo |
+| `index=3` | Microphone only, mono |
+
+Verify with ffprobe:
+
+```bash
+ffprobe -v quiet -show_streams -select_streams a tabrecord-2026-03-13-120000.mp4
+```
+
+---
+
+## Architecture
+
+```
+main.swift
+  └── AppDelegate           ← sets LSUIElement mode, checks screen capture TCC
+        └── MenuBarController   ← NSStatusItem, menu, duration timer
+              ├── SourcePickerWindowController  ← SwiftUI picker (displays / windows)
+              └── RecordingEngine               ← core capture & write pipeline
+                    ├── SCStream              ← video + source audio (ScreenCaptureKit)
+                    ├── AVAudioEngine         ← microphone tap
+                    └── AVAssetWriter         ← MP4 output, 3 audio tracks
+```
+
+### File map
 
 | File | Purpose |
 |---|---|
@@ -106,3 +124,19 @@ See `Makefile` for full notarization details.
 | `TabRecordApp/SourcePickerView.swift` | SwiftUI picker for displays/windows |
 | `TabRecordApp/Info.plist` | App metadata, LSUIElement, usage strings |
 | `TabRecordApp/TabRecord.entitlements` | Hardened Runtime: audio-input |
+
+---
+
+## Contributing
+
+Bug reports and pull requests are welcome.
+
+**Guidelines:**
+
+- Follow the existing Swift style (no third-party dependencies, AppKit + SwiftUI only)
+- Keep changes focused — one concern per PR
+- New behaviour must ship with tests or a reproducible verification step
+- Use [semantic commit messages](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, etc.)
+- Open an issue before starting large refactors so we can align on direction
+
+[Open an issue](https://github.com/La-Forge/MacWindowRecorder/issues) for bugs, feature requests, or questions.
