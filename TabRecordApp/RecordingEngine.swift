@@ -278,12 +278,16 @@ final class RecordingEngine: NSObject {
             audioLog.info("mic tap first buffer: sampleRate=\(buffer.format.sampleRate) channels=\(buffer.format.channelCount) frames=\(buffer.frameLength)")
         }
 
+        let pts = CMTimeConverter.cmTime(from: time, sampleRate: buffer.format.sampleRate)
+
+        // Allow the mic to start the writer session if video hasn't arrived yet.
+        startSessionIfNeeded(at: pts)
+
         guard let micInput = audioMicInput,
               micInput.isReadyForMoreMediaData,
               isSessionStarted()
         else { return }
 
-        let pts = CMTimeConverter.cmTime(from: time, sampleRate: buffer.format.sampleRate)
         guard let sampleBuffer = buffer.cmSampleBuffer(presentationTime: pts) else { return }
         micInput.append(sampleBuffer)
     }

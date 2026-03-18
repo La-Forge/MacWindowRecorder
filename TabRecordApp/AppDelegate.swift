@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import ScreenCaptureKit
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -10,6 +11,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // ScreenCaptureKit will also prompt on first use, but an early check
         // lets us guide the user before they try to record.
         checkScreenCapturePermission()
+
+        // Request microphone access at launch so the TCC prompt appears before
+        // the user starts recording. Without this the prompt may be suppressed
+        // or the mic tap may start silently producing empty buffers.
+        checkMicrophonePermission()
 
         menuBarController = MenuBarController()
     }
@@ -26,6 +32,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // If not, requesting it here surfaces the system prompt once at launch.
         if !CGPreflightScreenCaptureAccess() {
             CGRequestScreenCaptureAccess()
+        }
+    }
+
+    private func checkMicrophonePermission() {
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized:
+            break
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .audio) { _ in }
+        default:
+            break
         }
     }
 }
