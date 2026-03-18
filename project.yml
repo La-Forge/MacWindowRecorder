@@ -17,6 +17,7 @@ targets:
     settings:
       base:
         PRODUCT_NAME: TabRecord
+        PRODUCT_MODULE_NAME: TabRecordApp
         PRODUCT_BUNDLE_IDENTIFIER: com.tabrecord.app
         SWIFT_VERSION: "5.9"
         MACOSX_DEPLOYMENT_TARGET: "13.0"
@@ -55,3 +56,16 @@ targets:
       base:
         SWIFT_VERSION: "5.9"
         MACOSX_DEPLOYMENT_TARGET: "13.0"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TabRecord.app/Contents/MacOS/TabRecord"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  TabRecordApp:
+    build:
+      targets:
+        TabRecordApp: all
+        TabRecordAppTests: [test]
+    test:
+      targets:
+        - TabRecordAppTests

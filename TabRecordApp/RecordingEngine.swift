@@ -57,6 +57,12 @@ final class RecordingEngine: NSObject {
     private var audioSourceInput: AVAssetWriterInput?  // track 2 — app/screen audio
     private var audioMicInput: AVAssetWriterInput?     // track 3 — microphone
 
+    // Separate M4A writers for clean mic and speaker exports
+    private var micWriter: AVAssetWriter?
+    private var micWriterInput: AVAssetWriterInput?
+    private var speakerWriter: AVAssetWriter?
+    private var speakerWriterInput: AVAssetWriterInput?
+
     // Ring buffer of mic samples fed by AVAudioEngine tap, drained by the
     // SCStream audio queue during mixing. Protected by micRingLock.
     private let micRing = MicRingBuffer()
@@ -80,13 +86,20 @@ final class RecordingEngine: NSObject {
     // MARK: - Public API
 
     /// Configure and start all capture pipelines, then begin writing to `outputURL`.
-    func startRecording(source: RecordingSource, outputURL: URL) async throws {
+    func startRecording(
+        source: RecordingSource,
+        outputURL: URL,
+        micURL: URL,
+        speakerURL: URL
+    ) async throws {
         // Clean slate
         sessionStarted = false
         micRing.reset()
 
         // 1. Build the AVAssetWriter (synchronous, fast)
         try setupAssetWriter(outputURL: outputURL)
+        try setupMicWriter(micURL: micURL)
+        try setupSpeakerWriter(speakerURL: speakerURL)
 
         // 2. Build and start SCStream (async — may show permission prompt)
         try await setupStream(source: source)
@@ -98,6 +111,8 @@ final class RecordingEngine: NSObject {
         guard assetWriter?.startWriting() == true else {
             throw RecordingError.writerNotReady
         }
+        micWriter?.startWriting()
+        speakerWriter?.startWriting()
         try await stream?.startCapture()
     }
 
@@ -208,6 +223,56 @@ final class RecordingEngine: NSObject {
         self.audioMicInput = audioMicInput
     }
 
+    // MARK: - Mic/Speaker M4A writer setup
+
+    private func setupMicWriter(micURL: URL) throws {
+        try? FileManager.default.removeItem(at: micURL)
+        let writer: AVAssetWriter
+        do {
+            writer = try AVAssetWriter(url: micURL, fileType: .m4a)
+        } catch {
+            throw RecordingError.writerSetupFailed("mic writer: \(error.localizedDescription)")
+        }
+        let settings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVSampleRateKey: 48000,
+            AVNumberOfChannelsKey: 1,
+            AVEncoderBitRateKey: 96_000,
+        ]
+        let input = AVAssetWriterInput(mediaType: .audio, outputSettings: settings)
+        input.expectsMediaDataInRealTime = true
+        guard writer.canAdd(input) else {
+            throw RecordingError.writerSetupFailed("Cannot add mic audio input")
+        }
+        writer.add(input)
+        self.micWriter = writer
+        self.micWriterInput = input
+    }
+
+    private func setupSpeakerWriter(speakerURL: URL) throws {
+        try? FileManager.default.removeItem(at: speakerURL)
+        let writer: AVAssetWriter
+        do {
+            writer = try AVAssetWriter(url: speakerURL, fileType: .m4a)
+        } catch {
+            throw RecordingError.writerSetupFailed("speaker writer: \(error.localizedDescription)")
+        }
+        let settings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatMPEG4AAC,
+            AVSampleRateKey: 48000,
+            AVNumberOfChannelsKey: 2,
+            AVEncoderBitRateKey: 192_000,
+        ]
+        let input = AVAssetWriterInput(mediaType: .audio, outputSettings: settings)
+        input.expectsMediaDataInRealTime = true
+        guard writer.canAdd(input) else {
+            throw RecordingError.writerSetupFailed("Cannot add speaker audio input")
+        }
+        writer.add(input)
+        self.speakerWriter = writer
+        self.speakerWriterInput = input
+    }
+
     // MARK: - SCStream setup
 
     private func setupStream(source: RecordingSource) async throws {
@@ -283,13 +348,16 @@ final class RecordingEngine: NSObject {
         // Allow the mic to start the writer session if video hasn't arrived yet.
         startSessionIfNeeded(at: pts)
 
-        guard let micInput = audioMicInput,
-              micInput.isReadyForMoreMediaData,
-              isSessionStarted()
-        else { return }
+        guard isSessionStarted() else { return }
 
         guard let sampleBuffer = buffer.cmSampleBuffer(presentationTime: pts) else { return }
-        micInput.append(sampleBuffer)
+
+        if let micInput = audioMicInput, micInput.isReadyForMoreMediaData {
+            micInput.append(sampleBuffer)
+        }
+        if let micWriterIn = micWriterInput, micWriterIn.isReadyForMoreMediaData {
+            micWriterIn.append(sampleBuffer)
+        }
     }
 
     private func silentMonoBuffer(frameCount: AVAudioFrameCount, sampleRate: Double) -> AVAudioPCMBuffer {
@@ -315,6 +383,8 @@ final class RecordingEngine: NSObject {
         defer { sessionLock.unlock() }
         guard !sessionStarted else { return }
         assetWriter?.startSession(atSourceTime: pts)
+        micWriter?.startSession(atSourceTime: pts)
+        speakerWriter?.startSession(atSourceTime: pts)
         sessionStarted = true
     }
 
@@ -325,9 +395,19 @@ final class RecordingEngine: NSObject {
         audioMixedInput?.markAsFinished()
         audioSourceInput?.markAsFinished()
         audioMicInput?.markAsFinished()
+        micWriterInput?.markAsFinished()
+        speakerWriterInput?.markAsFinished()
 
         await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
             assetWriter?.finishWriting { cont.resume() }
+        }
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            if let w = micWriter { w.finishWriting { cont.resume() } }
+            else { cont.resume() }
+        }
+        await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            if let w = speakerWriter { w.finishWriting { cont.resume() } }
+            else { cont.resume() }
         }
 
         assetWriter = nil
@@ -336,6 +416,10 @@ final class RecordingEngine: NSObject {
         audioMixedInput = nil
         audioSourceInput = nil
         audioMicInput = nil
+        micWriter = nil
+        micWriterInput = nil
+        speakerWriter = nil
+        speakerWriterInput = nil
         // No lock needed — all capture queues are stopped before finaliseWriter runs.
         micRing.reset()
     }
@@ -398,9 +482,12 @@ extension RecordingEngine: SCStreamOutput {
     private func handleAudioSourceSample(_ sampleBuffer: CMSampleBuffer) {
         guard isSessionStarted() else { return }
 
-        // Track 2: clean speaker audio.
+        // Track 2: clean speaker audio (MP4) + separate speaker M4A.
         if let sourceInput = audioSourceInput, sourceInput.isReadyForMoreMediaData {
             sourceInput.append(sampleBuffer)
+        }
+        if let speakerWriterIn = speakerWriterInput, speakerWriterIn.isReadyForMoreMediaData {
+            speakerWriterIn.append(sampleBuffer)
         }
 
         // Track 1: mixed (L=speaker, R=mic). Uses the speaker's PTS for sync.

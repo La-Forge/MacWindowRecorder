@@ -16,6 +16,22 @@ enum OutputFileNamer {
         return recordingsDirectory().appendingPathComponent(name)
     }
 
+    /// Returns a URL for the microphone-only audio file, stamped with `date`.
+    ///
+    /// Example: `~/Movies/TabRecord/tabrecord-2026-03-13-143005-mic.m4a`
+    static func makeMicURL(date: Date = Date()) -> URL {
+        let name = "tabrecord-\(formatter.string(from: date))-mic.m4a"
+        return recordingsDirectory().appendingPathComponent(name)
+    }
+
+    /// Returns a URL for the speaker-only audio file, stamped with `date`.
+    ///
+    /// Example: `~/Movies/TabRecord/tabrecord-2026-03-13-143005-speaker.m4a`
+    static func makeSpeakerURL(date: Date = Date()) -> URL {
+        let name = "tabrecord-\(formatter.string(from: date))-speaker.m4a"
+        return recordingsDirectory().appendingPathComponent(name)
+    }
+
     /// The directory where recordings are stored.
     static func recordingsDirectory() -> URL {
         let movies = FileManager.default.urls(for: .moviesDirectory, in: .userDomainMask)[0]

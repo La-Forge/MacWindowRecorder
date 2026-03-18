@@ -153,9 +153,19 @@ final class MenuBarController: NSObject {
     private func startRecording(source: RecordingSource) async {
         guard !isRecording else { return }
 
-        let outputURL = makeOutputURL()
+        let date = Date()
+        let dir = OutputFileNamer.recordingsDirectory()
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let outputURL = OutputFileNamer.makeURL(date: date)
+        let micURL = OutputFileNamer.makeMicURL(date: date)
+        let speakerURL = OutputFileNamer.makeSpeakerURL(date: date)
         do {
-            try await recordingEngine.startRecording(source: source, outputURL: outputURL)
+            try await recordingEngine.startRecording(
+                source: source,
+                outputURL: outputURL,
+                micURL: micURL,
+                speakerURL: speakerURL
+            )
         } catch {
             presentError("Failed to start recording: \(error.localizedDescription)")
             return
@@ -208,12 +218,6 @@ final class MenuBarController: NSObject {
     }
 
     // MARK: - Helpers
-
-    private func makeOutputURL() -> URL {
-        let dir = OutputFileNamer.recordingsDirectory()
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return OutputFileNamer.makeURL()
-    }
 
     private func presentError(_ message: String) {
         let alert = NSAlert()

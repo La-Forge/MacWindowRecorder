@@ -89,4 +89,77 @@ final class OutputFileNamerTests: XCTestCase {
             OutputFileNamer.makeURL(date: d)
         )
     }
+
+    // MARK: - Mic audio URL
+
+    func testMicURLHasM4aExtension() {
+        let url = OutputFileNamer.makeMicURL()
+
+        XCTAssertEqual(url.pathExtension, "m4a")
+    }
+
+    func testMicURLContainsMicSuffix() {
+        let d = date(year: 2026, month: 3, day: 13, hour: 14, minute: 30, second: 5)
+
+        let url = OutputFileNamer.makeMicURL(date: d)
+
+        XCTAssertEqual(url.lastPathComponent, "tabrecord-2026-03-13-143005-mic.m4a")
+    }
+
+    func testMicURLIsInsideRecordingsDirectory() {
+        let dir = OutputFileNamer.recordingsDirectory()
+        let url = OutputFileNamer.makeMicURL()
+
+        XCTAssertTrue(
+            url.path.hasPrefix(dir.path),
+            "URL \(url.path) should be inside \(dir.path)"
+        )
+    }
+
+    func testMicURLSharesTimestampWithVideoURL() {
+        let d = date(year: 2026, month: 3, day: 13, hour: 14, minute: 30, second: 5)
+
+        let videoURL = OutputFileNamer.makeURL(date: d)
+        let micURL = OutputFileNamer.makeMicURL(date: d)
+
+        // Both share the same timestamp prefix
+        XCTAssertTrue(micURL.lastPathComponent.contains("2026-03-13-143005"))
+        XCTAssertTrue(videoURL.lastPathComponent.contains("2026-03-13-143005"))
+    }
+
+    // MARK: - Speaker audio URL
+
+    func testSpeakerURLHasM4aExtension() {
+        let url = OutputFileNamer.makeSpeakerURL()
+
+        XCTAssertEqual(url.pathExtension, "m4a")
+    }
+
+    func testSpeakerURLContainsSpeakerSuffix() {
+        let d = date(year: 2026, month: 3, day: 13, hour: 14, minute: 30, second: 5)
+
+        let url = OutputFileNamer.makeSpeakerURL(date: d)
+
+        XCTAssertEqual(url.lastPathComponent, "tabrecord-2026-03-13-143005-speaker.m4a")
+    }
+
+    func testSpeakerURLIsInsideRecordingsDirectory() {
+        let dir = OutputFileNamer.recordingsDirectory()
+        let url = OutputFileNamer.makeSpeakerURL()
+
+        XCTAssertTrue(
+            url.path.hasPrefix(dir.path),
+            "URL \(url.path) should be inside \(dir.path)"
+        )
+    }
+
+    func testSpeakerURLSharesTimestampWithVideoURL() {
+        let d = date(year: 2026, month: 3, day: 13, hour: 14, minute: 30, second: 5)
+
+        let videoURL = OutputFileNamer.makeURL(date: d)
+        let speakerURL = OutputFileNamer.makeSpeakerURL(date: d)
+
+        XCTAssertTrue(speakerURL.lastPathComponent.contains("2026-03-13-143005"))
+        XCTAssertTrue(videoURL.lastPathComponent.contains("2026-03-13-143005"))
+    }
 }
