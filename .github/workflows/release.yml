@@ -28,16 +28,25 @@ jobs:
             -derivedDataPath .build \
             -quiet
 
-      - name: Zip app bundle
+      - name: Create DMG
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          ditto -c -k --keepParent \
-            .build/Build/Products/Release/TabRecord.app \
-            TabRecord-$VERSION.zip
+          APP_PATH=".build/Build/Products/Release/TabRecord.app"
+          DMG_NAME="TabRecord-${VERSION}.dmg"
+          STAGING_DIR="$(mktemp -d)/dmg-staging"
+          mkdir -p "$STAGING_DIR"
+          cp -R "$APP_PATH" "$STAGING_DIR/"
+          ln -s /Applications "$STAGING_DIR/Applications"
+          hdiutil create \
+            -volname "TabRecord ${VERSION}" \
+            -srcfolder "$STAGING_DIR" \
+            -ov \
+            -format UDZO \
+            "$DMG_NAME"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: "TabRecord ${{ github.ref_name }}"
           generate_release_notes: true
-          files: TabRecord-*.zip
+          files: TabRecord-*.dmg

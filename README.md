@@ -3,6 +3,14 @@
 macOS menu bar app that records any **window or display** with separate audio
 tracks (source audio + microphone) using ScreenCaptureKit and AVFoundation.
 
+## Download
+
+**[TabRecord-1.0.1.dmg](https://github.com/La-Forge/MacWindowRecorder/releases/download/v1.0.1/TabRecord-1.0.1.dmg)**
+
+Open the DMG, drag **TabRecord** into the **Applications** folder, then launch it from Applications or Spotlight.
+
+> Always download the latest release from the [Releases page](https://github.com/La-Forge/MacWindowRecorder/releases/latest).
+
 ## Requirements
 
 | Requirement | Version |
