@@ -15,11 +15,18 @@ final class MenuBarController: NSObject {
     private var pickerWindowController: SourcePickerWindowController?
     private var nativePickerObserverRegistered = false
 
+    private let transcriptionCoordinator = TranscriptionCoordinator()
+    private let transcriptionPreferences = TranscriptionPreferences()
+    private var lastRecordingFiles: RecordingFiles?
+    private var transcriptionObserver: NSObjectProtocol?
+
     // MARK: - Init
 
     override init() {
         super.init()
         buildStatusItem()
+        observeTranscriptionState()
+        observeRetryRequest()
     }
 
     // MARK: - Status bar setup
@@ -33,7 +40,7 @@ final class MenuBarController: NSObject {
     private func updateStatusButton(recording: Bool) {
         guard let button = statusItem.button else { return }
         if recording {
-            // Show duration text; icon is hidden while recording
+            // Show duration text; icon is hidden while recording.
             button.image = nil
         } else {
             button.title = ""
@@ -70,6 +77,51 @@ final class MenuBarController: NSObject {
 
         menu.addItem(.separator())
 
+        // Transcription status / manual trigger (macOS 14+).
+        if #available(macOS 14.0, *) {
+            switch transcriptionCoordinator.state {
+            case .idle:
+                if let _ = lastRecordingFiles {
+                    let transcribeItem = NSMenuItem(
+                        title: "Transcribe Last Recording",
+                        action: #selector(handleTranscribeLastRecording),
+                        keyEquivalent: ""
+                    )
+                    transcribeItem.target = self
+                    menu.addItem(transcribeItem)
+                }
+            case .preparingModel:
+                menu.addItem(disabledItem("Downloading model…"))
+            case .transcribing(let progress):
+                let pct = Int(progress * 100)
+                menu.addItem(disabledItem("Transcribing… \(pct)%"))
+            case .diarizing:
+                menu.addItem(disabledItem("Identifying speakers…"))
+            case .aligning, .writing:
+                menu.addItem(disabledItem("Finishing transcript…"))
+            case .completed(let urls):
+                if let first = urls.first {
+                    let showItem = NSMenuItem(
+                        title: "Show Transcript in Finder",
+                        action: #selector(handleShowTranscript),
+                        keyEquivalent: ""
+                    )
+                    showItem.target = self
+                    showItem.representedObject = first
+                    menu.addItem(showItem)
+                }
+            case .failed:
+                let retryItem = NSMenuItem(
+                    title: "Retry Transcription",
+                    action: #selector(handleTranscribeLastRecording),
+                    keyEquivalent: ""
+                )
+                retryItem.target = self
+                menu.addItem(retryItem)
+            }
+            menu.addItem(.separator())
+        }
+
         let folderItem = NSMenuItem(
             title: "Open Recordings Folder",
             action: #selector(openRecordingsFolder),
@@ -77,6 +129,16 @@ final class MenuBarController: NSObject {
         )
         folderItem.target = self
         menu.addItem(folderItem)
+
+        if #available(macOS 14.0, *) {
+            let prefsItem = NSMenuItem(
+                title: "Preferences…",
+                action: #selector(openPreferences),
+                keyEquivalent: ","
+            )
+            prefsItem.target = self
+            menu.addItem(prefsItem)
+        }
 
         menu.addItem(.separator())
 
@@ -87,6 +149,37 @@ final class MenuBarController: NSObject {
         ))
 
         statusItem.menu = menu
+    }
+
+    private func disabledItem(_ title: String) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+        item.isEnabled = false
+        return item
+    }
+
+    // MARK: - Transcription state + retry observation
+
+    private func observeRetryRequest() {
+        NotificationCenter.default.addObserver(
+            forName: .transcriptionRetryRequested,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.handleTranscribeLastRecording()
+            }
+        }
+    }
+
+    private func observeTranscriptionState() {
+        // Re-build the menu whenever transcription state changes.
+        transcriptionObserver = NotificationCenter.default.addObserver(
+            forName: .transcriptionStateDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.rebuildMenu()
+        }
     }
 
     // MARK: - Actions
@@ -103,6 +196,26 @@ final class MenuBarController: NSObject {
         let dir = OutputFileNamer.recordingsDirectory()
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         NSWorkspace.shared.open(dir)
+    }
+
+    @objc private func handleTranscribeLastRecording() {
+        guard let files = lastRecordingFiles else { return }
+        transcriptionCoordinator.transcribe(
+            recordingFiles: files,
+            preferences: transcriptionPreferences
+        )
+        rebuildMenu()
+    }
+
+    @objc private func handleShowTranscript(_ sender: NSMenuItem) {
+        guard let url = sender.representedObject as? URL else { return }
+        NSWorkspace.shared.selectFile(url.path, inFileViewerRootedAtPath: "")
+    }
+
+    @objc private func openPreferences() {
+        guard #available(macOS 14.0, *) else { return }
+        PreferencesWindowController.shared.showWindow(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     // MARK: - Source picker
@@ -156,9 +269,10 @@ final class MenuBarController: NSObject {
         let date = Date()
         let dir = OutputFileNamer.recordingsDirectory()
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let outputURL = OutputFileNamer.makeURL(date: date)
-        let micURL = OutputFileNamer.makeMicURL(date: date)
+        let outputURL  = OutputFileNamer.makeURL(date: date)
+        let micURL     = OutputFileNamer.makeMicURL(date: date)
         let speakerURL = OutputFileNamer.makeSpeakerURL(date: date)
+
         do {
             try await recordingEngine.startRecording(
                 source: source,
@@ -173,6 +287,12 @@ final class MenuBarController: NSObject {
 
         isRecording = true
         recordingStartDate = Date()
+        lastRecordingFiles = RecordingFiles(
+            videoURL: outputURL,
+            micURL: micURL,
+            speakerURL: speakerURL,
+            date: date
+        )
         startDurationTimer()
         updateStatusButton(recording: true)
         rebuildMenu()
@@ -186,6 +306,17 @@ final class MenuBarController: NSObject {
         isRecording = false
         stopDurationTimer()
         updateStatusButton(recording: false)
+
+        // Auto-transcribe if enabled (macOS 14+).
+        if #available(macOS 14.0, *),
+           transcriptionPreferences.enabled,
+           let files = lastRecordingFiles {
+            transcriptionCoordinator.transcribe(
+                recordingFiles: files,
+                preferences: transcriptionPreferences
+            )
+        }
+
         rebuildMenu()
     }
 
@@ -226,6 +357,12 @@ final class MenuBarController: NSObject {
         alert.alertStyle = .warning
         alert.runModal()
     }
+}
+
+// MARK: - Notification name
+
+extension Notification.Name {
+    static let transcriptionStateDidChange = Notification.Name("TabRecordTranscriptionStateDidChange")
 }
 
 // MARK: - SCContentSharingPickerObserver (macOS 14+)

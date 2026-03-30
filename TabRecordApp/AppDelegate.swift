@@ -1,6 +1,7 @@
 import AppKit
 import AVFoundation
 import ScreenCaptureKit
+import UserNotifications
 
 class AppDelegate: NSObject, NSApplicationDelegate {
 
@@ -16,6 +17,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // the user starts recording. Without this the prompt may be suppressed
         // or the mic tap may start silently producing empty buffers.
         checkMicrophonePermission()
+
+        // Request notification permission so transcription completion/failure
+        // notifications can be delivered.
+        requestNotificationPermission()
 
         menuBarController = MenuBarController()
     }
@@ -45,4 +50,83 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             break
         }
     }
+
+    private func requestNotificationPermission() {
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+
+        // Register action categories.
+        let showAction = UNNotificationAction(
+            identifier: NotificationAction.showInFinder,
+            title: "Show in Finder",
+            options: .foreground
+        )
+        let retryAction = UNNotificationAction(
+            identifier: NotificationAction.retry,
+            title: "Retry",
+            options: .foreground
+        )
+
+        let completeCategory = UNNotificationCategory(
+            identifier: NotificationCategory.transcriptionComplete,
+            actions: [showAction],
+            intentIdentifiers: []
+        )
+        let failedCategory = UNNotificationCategory(
+            identifier: NotificationCategory.transcriptionFailed,
+            actions: [retryAction],
+            intentIdentifiers: []
+        )
+        center.setNotificationCategories([completeCategory, failedCategory])
+
+        center.requestAuthorization(options: [.alert, .sound]) { _, _ in }
+    }
+}
+
+// MARK: - UNUserNotificationCenterDelegate
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+
+    /// Deliver notifications even when the app is in the foreground.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
+    }
+
+    /// Handle taps on notification actions.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        defer { completionHandler() }
+
+        switch response.actionIdentifier {
+        case NotificationAction.showInFinder, UNNotificationDefaultActionIdentifier:
+            // Tap on "Show in Finder" or the notification body itself.
+            if let pathsString = response.notification.request.content.userInfo["urls"] as? String {
+                let paths = pathsString.components(separatedBy: "\n")
+                // Reveal the first transcript file in Finder.
+                if let firstPath = paths.first, !firstPath.isEmpty {
+                    NSWorkspace.shared.selectFile(firstPath, inFileViewerRootedAtPath: "")
+                }
+            }
+
+        case NotificationAction.retry:
+            // Post a notification so MenuBarController can retry via its coordinator.
+            NotificationCenter.default.post(name: .transcriptionRetryRequested, object: nil)
+
+        default:
+            break
+        }
+    }
+}
+
+// MARK: - Notification names
+
+extension Notification.Name {
+    static let transcriptionRetryRequested = Notification.Name("TabRecordTranscriptionRetryRequested")
 }

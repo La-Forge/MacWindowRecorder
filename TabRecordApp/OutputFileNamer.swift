@@ -32,6 +32,14 @@ enum OutputFileNamer {
         return recordingsDirectory().appendingPathComponent(name)
     }
 
+    /// Returns a URL for a transcript file with the given extension, stamped with `date`.
+    ///
+    /// Example: `~/Movies/TabRecord/tabrecord-2026-03-13-143005-transcript.txt`
+    static func makeTranscriptURL(date: Date = Date(), ext: String) -> URL {
+        let name = "tabrecord-\(formatter.string(from: date))-transcript.\(ext)"
+        return recordingsDirectory().appendingPathComponent(name)
+    }
+
     /// The directory where recordings are stored.
     static func recordingsDirectory() -> URL {
         let movies = FileManager.default.urls(for: .moviesDirectory, in: .userDomainMask)[0]

@@ -1,4 +1,13 @@
 name: TabRecordApp
+
+packages:
+  WhisperKit:
+    url: https://github.com/argmaxinc/WhisperKit
+    from: 0.9.0
+  SpeakerKit:
+    url: https://github.com/argmaxinc/SpeakerKit
+    from: 0.1.0
+
 options:
   bundleIdPrefix: com.tabrecord
   deploymentTarget:
@@ -43,6 +52,11 @@ targets:
       - sdk: CoreMedia.framework
       - sdk: CoreVideo.framework
       - sdk: CoreAudio.framework
+      - sdk: UserNotifications.framework
+      - package: WhisperKit
+        product: WhisperKit
+      - package: SpeakerKit
+        product: SpeakerKit
 
   TabRecordAppTests:
     type: bundle.unit-test
