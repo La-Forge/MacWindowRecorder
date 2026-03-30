@@ -15,9 +15,13 @@ tracks (source audio + microphone) using ScreenCaptureKit and AVFoundation.
 
 ## Requirements
 
-macOS **13.0 (Ventura)** or later.
+| Feature | Minimum macOS |
+|---|---|
+| Recording (screen + audio) | **13.0 (Ventura)** |
+| Transcription + diarization | **14.0 (Sonoma)** |
 
-> **Why macOS 13?** `SCStreamOutputType.audio` (separate screen audio from SCStream) was introduced in macOS 13.
+> **Why macOS 13 for recording?** `SCStreamOutputType.audio` was introduced in macOS 13.
+> **Why macOS 14 for transcription?** WhisperKit CoreML optimisations (ANE encoder) require the macOS 14 CoreML runtime.
 
 ## First launch — permissions
 
@@ -74,6 +78,54 @@ See `Makefile` for full notarization details.
 
 ---
 
+## Transcription & Speaker Diarization
+
+> Requires **macOS 14.0+**. Models are downloaded once (~1.5 GB) and cached locally.
+
+After each recording, TabRecord automatically transcribes the audio and identifies speakers — **entirely on-device** using Apple Neural Engine acceleration. No audio ever leaves your Mac.
+
+### Output files (saved alongside the recording)
+
+```
+tabrecord-YYYY-MM-DD-HHmmss-transcript.txt   ← speaker-labelled plain text
+tabrecord-YYYY-MM-DD-HHmmss-transcript.json  ← word-level timestamps + speakers
+tabrecord-YYYY-MM-DD-HHmmss-transcript.srt   ← subtitles for QuickTime / VLC
+```
+
+### Example TXT output
+
+```
+[00:00:03 → 00:00:12] SPEAKER_00:
+Hello everyone, welcome to the meeting. Today we're going over the quarterly results.
+
+[00:00:13 → 00:00:28] SPEAKER_01:
+Thanks for having me. I've prepared a short summary of the key metrics.
+```
+
+### Privacy
+
+All transcription and diarization runs locally via [WhisperKit](https://github.com/argmaxinc/WhisperKit) (Whisper large-v3-turbo, CoreML/ANE) and [SpeakerKit](https://github.com/argmaxinc/SpeakerKit) (pyannote v4, CoreML/ANE). No data is sent to any server.
+
+### Performance on M3 Max
+
+| Step | Duration (60 min audio) |
+|---|---|
+| Transcription (large-v3-turbo, ANE) | ~3 min |
+| Speaker diarization (SpeakerKit, ANE) | ~12 sec |
+| **Total** | **~3.5 min** |
+
+### Configuration
+
+Open **Preferences…** from the menu bar icon to configure:
+- Model size (Small / Medium / Large v3 Turbo / Large v3)
+- Language override (default: auto-detect)
+- Speaker count hint (default: auto)
+- Audio source for transcription (speaker track / mic / mixed)
+- Output formats (TXT, JSON, SRT)
+- Enable / disable auto-transcription
+
+---
+
 ## Output format
 
 Files are saved in `~/Movies/TabRecord/`:
@@ -102,13 +154,20 @@ ffprobe -v quiet -show_streams -select_streams a tabrecord-2026-03-13-120000.mp4
 
 ```
 main.swift
-  └── AppDelegate           ← sets LSUIElement mode, checks screen capture TCC
-        └── MenuBarController   ← NSStatusItem, menu, duration timer
-              ├── SourcePickerWindowController  ← SwiftUI picker (displays / windows)
-              └── RecordingEngine               ← core capture & write pipeline
-                    ├── SCStream              ← video + source audio (ScreenCaptureKit)
-                    ├── AVAudioEngine         ← microphone tap
-                    └── AVAssetWriter         ← MP4 output, 3 audio tracks
+  └── AppDelegate              ← LSUIElement mode, TCC checks, notification setup
+        └── MenuBarController  ← NSStatusItem, menu, duration timer
+              ├── SourcePickerWindowController   ← SwiftUI picker (displays / windows)
+              ├── RecordingEngine                ← SCStream + AVAudioEngine + AVAssetWriter
+              │     ├── SCStream               ← video + source audio (ScreenCaptureKit)
+              │     ├── AVAudioEngine          ← microphone tap
+              │     └── AVAssetWriter          ← MP4 output, 3 audio tracks
+              └── TranscriptionCoordinator       ← post-recording transcription pipeline
+                    ├── ModelManager           ← CoreML model download & cache
+                    ├── AudioPreprocessor      ← extract track → 16 kHz mono WAV
+                    ├── WhisperKitTranscriber  ← ASR via WhisperKit (ANE/CoreML)
+                    ├── SpeakerKitDiarizer     ← diarization via SpeakerKit (ANE/CoreML)
+                    ├── SegmentAligner         ← merge word timestamps + speaker labels
+                    └── TranscriptWriter       ← write TXT / JSON / SRT files
 ```
 
 ### File map
